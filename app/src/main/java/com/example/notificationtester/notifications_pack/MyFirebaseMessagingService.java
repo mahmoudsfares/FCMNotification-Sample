@@ -1,5 +1,6 @@
 package com.example.notificationtester.notifications_pack;
 
+
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -11,10 +12,11 @@ import androidx.annotation.NonNull;
 import com.example.notificationtester.R;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+import com.google.gson.Gson;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
-    String title, message;
+    Message message;
 
     private static final String NOTIFICATION_CHANNEL_ID = "notif-channel";
     private static final String NOTIFICATION_CHANNEL_NAME = "Primary";
@@ -23,9 +25,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
 
-        // when getting title and message from remote message data, keys for title and message MUST be written like this
-        title = remoteMessage.getData().get("Title");
-        message = remoteMessage.getData().get("Message");
+        Gson gson = new Gson();
+        message = gson.fromJson(remoteMessage.getData().get("Message"), Message.class);
 
         NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
@@ -40,8 +41,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             Notification.Builder builder = new Notification.Builder(getApplicationContext(), NOTIFICATION_CHANNEL_ID)
                     // these are the basic 3 notification components, app will crash if one is missing
                     .setSmallIcon(R.drawable.common_google_signin_btn_icon_dark)
-                    .setContentTitle(title)
-                    .setContentText(message);
+                    .setContentTitle(message.getSendingTime()+"")
+                    .setContentText(message.getMessageBody());
             manager.notify(0, builder.build());
         }
 
@@ -51,8 +52,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             Notification.Builder builder = new Notification.Builder(getApplicationContext())
                     // these are the basic 3 notification components, app will crash if one is missing
                     .setSmallIcon(R.drawable.common_google_signin_btn_icon_dark)
-                    .setContentTitle(title)
-                    .setContentText(message);
+                    .setContentTitle(message.getSendingTime()+"")
+                    .setContentText(message.getMessageBody());
             manager.notify(0, builder.build());
         }
     }
